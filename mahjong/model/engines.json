@@ -1,0 +1,19 @@
+{
+  "format": 1,
+  "default": "mortal-s42-q8",
+  "engines": [
+    {
+      "id": "mortal-s42-q8",
+      "name": "Mortal-S42 · int8 가중치 + QAT",
+      "kind": "base",
+      "description": "원본 Mortal-S42를 가중치 int8로 줄이고 원본을 교사로 증류 미세조정한 기본 엔진. 원본 대비 Q 격차 평균 오차 0.0034.",
+      "file": "mortal-s42-q8/mortal.onnx",
+      "version": "4715eb1778a6",
+      "sha256": "4715eb1778a6e074002dc92a7c80157cacc0ef120700b646a6cc855ed795e207",
+      "bytes": 12402808,
+      "license": "Apache-2.0",
+      "base": "Mortal-S42 (S42.8k), Hugging Face haor/Mortal-S42",
+      "changes": "ONNX 변환, 합성곱 가중치 int8(채널별) 양자화, 나머지 fp16 저장, 원본을 교사로 한 증류 미세조정(QAT). 입력은 공개 대국 로그에서 만든 관측 텐서(로그 자체는 포함하지 않음)."
+    }
+  ]
+}

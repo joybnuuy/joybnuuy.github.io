@@ -35,7 +35,7 @@ function effQuestion(st, ev, me, meta) {
   if (opts.filter(o => o.shanten === minS).length < 3) return null; // 너무 뻔한 문제 제외
   return {
     mode: 'eff', meta, view: publicView(st, me), hand: hand.slice(), drawn: st.drawn[me],
-    actual: ev.tile >> 2, turn: st.rivers[me].length + 1,
+    actual: ev.tile >> 2, turn: st.rivers[me].length + 1, unseen,
     opts: opts.map(o => ({ kind: o.kind, shanten: o.shanten, ue: o.ue, draws: o.draws, next: o.next ?? null, rank: o.rank, deep: !!o.deep })),
   };
 }
@@ -84,7 +84,7 @@ function tenpaiQuestion(st, ev, me, meta) {
   }
   if (players.every(x => x.riichi)) return null;
   return {
-    mode: 'tenpai', meta, view: publicView(st, me), hand: st.hands[me].slice(),
+    mode: 'tenpai', meta, view: publicView(st, me), hand: st.hands[me].slice(), unseen: visibleCounts(st, me).map(v => 4 - v),
     players,
     askedHasTenpai: players.some(x => !x.riichi && x.tenpai),
   };
@@ -95,6 +95,7 @@ function tenpaiQuestion(st, ev, me, meta) {
 function effQuestionAi(st, ev, me, meta, pt) {
   const built = buildOptions(pt);
   if (!built) return null;
+  if (!built.opts.every(o => st.hands[me].some(t => t >> 2 === o.kind))) return null; // 캐시가 로그와 어긋난 경우 방어
   const hand = st.hands[me], c14 = countsOf(hand), nm = st.melds[me].length;
   const unseen = visibleCounts(st, me).map(v => 4 - v);
   const local = evalDiscards(c14, nm, unseen, new Set(st.dora.map(doraKind)), new Set(hand.filter(isRed).map(t => t >> 2)));
@@ -105,13 +106,14 @@ function effQuestionAi(st, ev, me, meta, pt) {
   if (opts[0].p >= 0.9 && opts[0].kind === actual) return null; // 너무 뻔한 문제 제외
   return {
     mode: 'eff', ai: true, meta, view: publicView(st, me), hand: hand.slice(), drawn: st.drawn[me],
-    actual, turn: st.rivers[me].length + 1, opts, pReach: built.pReach,
+    actual, turn: st.rivers[me].length + 1, opts, pReach: built.pReach, unseen,
   };
 }
 
 function defQuestionAi(st, ev, me, meta, pt) {
   const built = buildOptions(pt);
   if (!built) return null;
+  if (!built.opts.every(o => st.hands[me].some(t => t >> 2 === o.kind))) return null;
   const riichers = [0, 1, 2, 3].filter(p => p !== me && st.riichi[p]);
   if (!riichers.length) return null;
   const labels = ['나', '하가', '대면', '상가'];
@@ -126,13 +128,13 @@ function defQuestionAi(st, ev, me, meta, pt) {
     c14[o.kind]--;
     const sh = shanten(c14, nm);
     c14[o.kind]++;
-    return { ...o, est: d.p, tags: d.tags, ron: ronKinds.has(o.kind), sh };
+    return { ...o, est: d.p, tags: d.tags, whys: d.whys, ron: ronKinds.has(o.kind), sh };
   });
   return {
     mode: 'def', ai: true, meta, view: publicView(st, me), hand: hand.slice(), drawn: st.drawn[me],
     actual: ev.tile >> 2, myShanten: Math.min(...opts.map(o => o.sh)), pReach: built.pReach,
-    riichers: infos.map(i => ({ r: i.r, waits: i.waits, furiten: i.furiten, hand: st.hands[i.r].slice() })),
-    opts,
+    riichers: infos.map(i => ({ r: i.r, waits: i.waits, furiten: i.furiten, hand: st.hands[i.r].slice(), dealer: i.dealer, riichiTurn: i.riichiTurn, own: [...i.own], passed: [...i.passed] })),
+    unseen: vis.map(v => 4 - v), opts,
   };
 }
 
@@ -172,15 +174,15 @@ export function generate(xml, id, ai) {
         const pt = useAi && ai.points[`${r}:${i}`];
         if (pt && pt.seat === ev.p) {
           const q = pt.mode === 'eff' ? effQuestionAi(st, ev, ev.p, meta, pt) : defQuestionAi(st, ev, ev.p, meta, pt);
-          if (q) out[pt.mode].push(q);
+          if (q) { q.key = `${meta.id}:${r}:${i}`; out[pt.mode].push(q); }  // key = 오답노트용 안정 ID
         }
         if (wantEff.has(st.seq) && effGot < 2) {
           const q = effQuestion(st, ev, ev.p, meta);
-          if (q) { out.eff.push(q); effGot++; }
+          if (q) { q.key = `${meta.id}:${r}:${i}`; out.eff.push(q); effGot++; }
         }
         if (wantDef.has(st.seq) && defGot < 2) {
           const q = defQuestion(st, ev, ev.p, meta);
-          if (q) { out.def.push(q); defGot++; }
+          if (q) { q.key = `${meta.id}:${r}:${i}`; out.def.push(q); defGot++; }
         }
       },
       after(st, ev) {
@@ -188,7 +190,7 @@ export function generate(xml, id, ai) {
           // 관찰자는 방금 버린 사람이 아닌 무작위 플레이어
           const me = pick([0, 1, 2, 3].filter(p => p !== ev.p));
           const q = tenpaiQuestion(st, ev, me, meta);
-          if (q) tenGot.push(q);
+          if (q) { q.key = `${meta.id}:${r}:${st.seq}:${me}`; tenGot.push(q); }
         }
       },
     });

@@ -9,7 +9,7 @@ export function countsOf(ids) {
   return c;
 }
 
-function regular(c, melds) {
+export function regularSlow(c, melds) {
   let best = 99;
   function dfs(i, m, t, p) {
     while (i < 34 && c[i] === 0) i++;
@@ -38,13 +38,82 @@ function regular(c, melds) {
   return best;
 }
 
+
+// ---------- 빠른 샨텐: 수트별 패턴 표 캐시 + 합성 ----------
+// 한 수트(9칸)의 패턴 → T[p][m] = (멘쯔 m개, 머리 p개일 때) 탈쯔 최대 수 (불가능하면 -1)
+const suitCache = new Map();
+function suitTable(a) {
+  let key = 0; for (let i = 0; i < 9; i++) key = key * 5 + a[i];
+  let tab = suitCache.get(key);
+  if (tab) return tab;
+  tab = [new Array(5).fill(-1), new Array(5).fill(-1)];
+  const c = a.slice();
+  const rec = (i, m, t, p) => {
+    while (i < 9 && c[i] === 0) i++;
+    if (i >= 9) { if (m <= 4 && t > tab[p][m]) tab[p][m] = t; return; }
+    if (c[i] >= 3) { c[i] -= 3; rec(i, m + 1, t, p); c[i] += 3; }
+    if (i <= 6 && c[i + 1] && c[i + 2]) { c[i]--; c[i + 1]--; c[i + 2]--; rec(i, m + 1, t, p); c[i]++; c[i + 1]++; c[i + 2]++; }
+    if (c[i] >= 2) { c[i] -= 2; if (!p) rec(i, m, t, 1); rec(i, m, t + 1, p); c[i] += 2; }
+    if (i <= 7 && c[i + 1]) { c[i]--; c[i + 1]--; rec(i, m, t + 1, p); c[i]++; c[i + 1]++; }
+    if (i <= 6 && c[i + 2]) { c[i]--; c[i + 2]--; rec(i, m, t + 1, p); c[i]++; c[i + 2]++; }
+    c[i]--; rec(i, m, t, p); c[i]++;
+  };
+  rec(0, 0, 0, 0);
+  suitCache.set(key, tab);
+  return tab;
+}
+function honorTable(c, off) {
+  const tab = [new Array(5).fill(-1), new Array(5).fill(-1)];
+  // dp[p][m] = max t, 7종을 순서대로
+  let dp = [[0, -1, -1, -1, -1], [-1, -1, -1, -1, -1]];
+  for (let k = 0; k < 7; k++) {
+    const n = c[off + k];
+    if (!n) continue;
+    const nd = [new Array(5).fill(-1), new Array(5).fill(-1)];
+    const put = (p, m, t) => { if (m <= 4 && t > nd[p][m]) nd[p][m] = t; };
+    for (let p = 0; p < 2; p++) for (let m = 0; m < 5; m++) {
+      const t = dp[p][m]; if (t < 0) continue;
+      put(p, m, t); // 고립
+      if (n >= 3) put(p, m + 1, t);
+      if (n >= 2) { if (!p) put(1, m, t); put(p, m, t + 1); }
+    }
+    dp = nd;
+  }
+  return dp;
+}
+export function shantenRegularFast(c, melds) {
+  for (let i = 0; i < 34; i++) if (c[i] < 0 || c[i] > 4) throw new Error('잘못된 패 개수: ' + c.join(''));
+  const tabs = [suitTable(c.slice(0, 9)), suitTable(c.slice(9, 18)), suitTable(c.slice(18, 27)), honorTable(c, 27)];
+  let dp = [new Array(5).fill(-1), new Array(5).fill(-1)];
+  dp[0][Math.min(4, melds)] = 0;
+  for (const tb of tabs) {
+    const nd = [new Array(5).fill(-1), new Array(5).fill(-1)];
+    for (let p = 0; p < 2; p++) for (let m = 0; m < 5; m++) {
+      const t = dp[p][m]; if (t < 0) continue;
+      for (let ps = 0; ps + p < 2; ps++) for (let ms = 0; ms + m < 5; ms++) {
+        const ts = tb[ps][ms]; if (ts < 0) continue;
+        if (t + ts > nd[p + ps][m + ms]) nd[p + ps][m + ms] = t + ts;
+      }
+    }
+    dp = nd;
+  }
+  let best = 99;
+  for (let p = 0; p < 2; p++) for (let m = 0; m < 5; m++) {
+    const t = dp[p][m]; if (t < 0) continue;
+    const tt = Math.min(t, 4 - m);
+    const s = 8 - 2 * m - tt - p;
+    if (s < best) best = s;
+  }
+  return best;
+}
+
 const TERMINALS = [0, 8, 9, 17, 18, 26, 27, 28, 29, 30, 31, 32, 33];
 
 export function shanten(c, melds = 0) {
   const key = melds + ':' + c.join('');
   let v = memo.get(key);
   if (v !== undefined) return v;
-  v = regular(c, melds);
+  v = shantenRegularFast(c, melds);
   if (melds === 0) {
     let pairs = 0, kinds = 0;
     for (let i = 0; i < 34; i++) { if (c[i] >= 2) pairs++; if (c[i] >= 1) kinds++; }

@@ -1,8 +1,0 @@
-{
-  "name": "Mortal-S42 (S42.8k) · 가중치 int8 + QAT 증류",
-  "file": "mortal.onnx",
-  "version": "4715eb1778a6",
-  "sha256": "4715eb1778a6e074002dc92a7c80157cacc0ef120700b646a6cc855ed795e207",
-  "bytes": 12402808,
-  "license": "Apache-2.0"
-}
