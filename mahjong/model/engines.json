@@ -1,6 +1,21 @@
 {
   "format": 1,
   "default": "mortal-s42-q8",
+  "runtime": {
+    "version": "05a87e6f0c0e",
+    "files": [
+      {
+        "id": "ort",
+        "path": "vendor/ort/ort-wasm-simd-threaded.wasm",
+        "bytes": 14239897
+      },
+      {
+        "id": "core",
+        "path": "vendor/core/mortal_wasm_core_bg.wasm",
+        "bytes": 1237649
+      }
+    ]
+  },
   "engines": [
     {
       "id": "mortal-s42-q8",
