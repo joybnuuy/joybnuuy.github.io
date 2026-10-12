@@ -8,12 +8,19 @@
       "kind": "base",
       "description": "원본 Mortal-S42를 가중치 int8로 줄이고 원본을 교사로 증류 미세조정한 기본 엔진. 원본 대비 Q 격차 평균 오차 0.0034.",
       "file": "mortal-s42-q8/mortal.onnx",
-      "version": "4715eb1778a6",
-      "sha256": "4715eb1778a6e074002dc92a7c80157cacc0ef120700b646a6cc855ed795e207",
-      "bytes": 12402808,
+      "version": "e15eb4ad2624",
+      "sha256": "e15eb4ad26248eadb48892e1d777b4b9056a760d39239b442f8ff2d20b23c211",
+      "modelSha256": "fcb50c8c95beb0cdcb2afd13f79e2d56ab7c29082d7b6523d5c05d9d7c9e715f",
+      "bytes": 12402889,
+      "styles": {
+        "file": "mortal-s42-q8/styles.json",
+        "bin": "mortal-s42-q8/styles.bin",
+        "jsonBytes": 1431,
+        "binBytes": 566352
+      },
       "license": "Apache-2.0",
       "base": "Mortal-S42 (S42.8k), Hugging Face haor/Mortal-S42",
-      "changes": "ONNX 변환, 합성곱 가중치 int8(채널별) 양자화, 나머지 fp16 저장, 원본을 교사로 한 증류 미세조정(QAT). 입력은 공개 대국 로그에서 만든 관측 텐서(로그 자체는 포함하지 않음)."
+      "changes": "ONNX 변환, 합성곱 가중치 int8(채널별) 양자화, 나머지 fp16 저장, 원본을 교사로 한 증류 미세조정(QAT). 입력은 공개 대국 로그에서 만든 관측 텐서(로그 자체는 포함하지 않음). 몸체 특징(phi)을 추가 출력으로 노출하도록 출력 노드 하나만 더했다(가중치 불변). 스타일 헤드(styles.json/bin)를 함께 배포한다."
     }
   ]
 }

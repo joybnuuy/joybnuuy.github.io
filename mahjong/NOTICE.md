@@ -13,8 +13,9 @@ GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later). 전문: [LI
 ## Mortal 모델 가중치 (엔진)
 ### Mortal-S42 · int8 가중치 + QAT  (id: `mortal-s42-q8`)
 - 원본: Mortal-S42 (S42.8k), Hugging Face haor/Mortal-S42, Apache-2.0 — <https://www.apache.org/licenses/LICENSE-2.0>
-- **변경됨(Apache-2.0 §4(b))**: `model/mortal-s42-q8/mortal.onnx` — ONNX 변환, 합성곱 가중치 int8(채널별) 양자화, 나머지 fp16 저장, 원본을 교사로 한 증류 미세조정(QAT). 입력은 공개 대국 로그에서 만든 관측 텐서(로그 자체는 포함하지 않음).
-- 파일 sha256: `4715eb1778a6e074002dc92a7c80157cacc0ef120700b646a6cc855ed795e207`
+- **변경됨(Apache-2.0 §4(b))**: `model/mortal-s42-q8/mortal.onnx` — ONNX 변환, 합성곱 가중치 int8(채널별) 양자화, 나머지 fp16 저장, 원본을 교사로 한 증류 미세조정(QAT). 입력은 공개 대국 로그에서 만든 관측 텐서(로그 자체는 포함하지 않음). 몸체 특징(phi)을 추가 출력으로 노출하도록 출력 노드 하나만 더했다(가중치 불변). 스타일 헤드(styles.json/bin)를 함께 배포한다.
+- 모델 파일 sha256: `fcb50c8c95beb0cdcb2afd13f79e2d56ab7c29082d7b6523d5c05d9d7c9e715f`
+- 스타일 헤드(`model/mortal-s42-q8/styles.json`, `mortal-s42-q8/styles.bin`): 천봉명인전·천봉위 공개 대국으로 학습한 보정 계수(선수/군집의 선호를 Mortal 의 Q 에 더하는 작은 행렬). 대국 데이터와 선수 이름은 포함하지 않으며 채점에는 쓰지 않는 참고 표시용입니다.
 
 ## 패 이미지
 `v4/tiles/libre/*.svg` — libreriichi-assets (<https://codeberg.org/davidgomez/libreriichi-assets>), **CC0 1.0** (퍼블릭 도메인).
