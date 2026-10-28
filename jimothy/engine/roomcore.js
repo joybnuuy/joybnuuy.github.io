@@ -144,6 +144,16 @@ export class RoomCore {
     const s = this.slots[seat];
     if (!s || !s.human || s.connected === on) return;
     s.connected = on;
+    if (on) s.autoStreak = 0; // 다시 들어오면 직접 두기로 돌아온다
+    this.resetSeatTimer(seat);
+    this.schedule();
+  }
+
+  // '자동'으로 두던 사람이 직접 두기로 돌아온다
+  resumeManual(seat        )       {
+    const s = this.slots[seat];
+    if (!s || !s.human || s.autoStreak === 0) return;
+    s.autoStreak = 0;
     this.resetSeatTimer(seat);
     this.schedule();
   }

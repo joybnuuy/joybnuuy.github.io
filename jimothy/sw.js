@@ -1,5 +1,5 @@
 ﻿// 앱 껍데기만 캐시한다 (대국 상태는 항상 서버에서)
-const CACHE = 'jimothy-mvru2gmi';
+const CACHE = 'jimothy-mvruza3r';
 const SHELL = ['./', 'style.css', 'tiles.js', 'app.js', 'manifest.webmanifest', 'icons/icon.svg'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => {

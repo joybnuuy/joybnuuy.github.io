@@ -216,6 +216,9 @@ function hostHandle(msg, local) {
         if (seat < 0) return;
         core.act(seat, msg.action);
         break;
+      case 'manual':
+        if (seat >= 0) core.resumeManual(seat);
+        break;
       case 'next':
         if (seat >= 0) core.ready(seat);
         break;

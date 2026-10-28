@@ -294,6 +294,8 @@ function gameHTML() {
   else if (h.phase.endsWith('resp') || h.phase === 'pub-post') status = waitNames.length ? `${waitNames.map(esc).join(', ')} 기다리는 중…` : '진행 중…';
   else status = '';
   if (myTurn && h.deadline) status += ` <span class="timer" id="timer"></span>`;
+  // 시간 초과가 이어져 '자동'으로 두는 중이면 직접 두기로 돌아오는 버튼
+  if (S.room.phase === 'playing' && myP.auto) status = `<span class="autobar">🤖 자동으로 두는 중이에요 <button class="act" id="manual">직접 두기</button></span>`;
 
   return `<div class="game"><div class="hdr"><b>${esc(m.title)}</b><span>리치봉 ${h.sticks}</span><span class="sp"></span><span>패 ${h.wallLeft}</span><button class="icon" id="mute">${Sfx.isMuted() ? '🔇' : '🔊'}</button><button class="icon" id="help">도움말</button><button class="icon" id="leave">나가기</button></div>
     <div class="opps">${opp}</div>
@@ -433,6 +435,7 @@ const onTap = (e) => {
   let el;
   if ((el = q('[data-g]')) && Guide.onClick(el)) return;
   if (q('#help')) { ui.help = 1; renderModals(); return; }
+  if (q('#manual')) { api('manual').catch((er) => toast(er.message)); return; }
   if ((el = q('button[data-r]')) && Rules.onClick(el)) return;
   if (q('#mute')) { Sfx.setMuted(!Sfx.isMuted()); render(); return; }
   if (q('#rules') && S && session && S.room.phase !== 'lobby') { ui.rules = 1; renderModals(); return; }

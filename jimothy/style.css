@@ -327,3 +327,6 @@ input::placeholder { color: #82a091; }
 /* 좁은 화면에서 머리줄이 두 줄로 꺾이지 않게 */
 .hdr { gap: 6px; padding-left: 10px; padding-right: 8px; } .hdr > * { white-space: nowrap; flex: none; } .hdr .sp { flex: 1; }
 .hdr b { font-size: 16px; } .hdr .icon { padding: 6px 8px; }
+
+.autobar { display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; font-weight: 700; }
+.autobar .act { display: inline-flex; padding: 6px 14px; font-size: 15px; background: linear-gradient(var(--brass-light), var(--brass)); color: #3a2705; border-color: #8a6118; }
